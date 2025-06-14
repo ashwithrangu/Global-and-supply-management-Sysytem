@@ -1,3 +1,99 @@
+create database GLSCMS;
+use GLSCMS;
+
+CREATE TABLE Clients (
+    client_id INT PRIMARY KEY,
+    name VARCHAR(100),
+    address TEXT
+);
+
+
+CREATE TABLE Carriers (
+    carrier_id INT PRIMARY KEY,
+    name VARCHAR(100),
+    type ENUM('air', 'land', 'sea'),
+    contact_info TEXT
+);
+
+CREATE TABLE Warehouses (
+    warehouse_id INT PRIMARY KEY,
+    location VARCHAR(100),
+    capacity INT
+);
+
+CREATE TABLE Employees (
+    employee_id INT PRIMARY KEY,
+    name VARCHAR(100),
+    role VARCHAR(50),
+    assigned_warehouse_id INT,
+    assigned_carrier_id INT,
+    CHECK (
+        (assigned_warehouse_id IS NOT NULL AND assigned_carrier_id IS NULL) OR
+        (assigned_warehouse_id IS NULL AND assigned_carrier_id IS NOT NULL)
+    ),
+    FOREIGN KEY (assigned_warehouse_id) REFERENCES Warehouses(warehouse_id),
+    FOREIGN KEY (assigned_carrier_id) REFERENCES Carriers(carrier_id)
+);
+
+CREATE TABLE Shipments (
+    shipment_id INT PRIMARY KEY,
+    origin VARCHAR(100),
+    destination VARCHAR(100),
+    weight DECIMAL(10, 2),
+    content_description TEXT,
+    shipment_date DATE,
+    sender_id INT,
+    receiver_id INT,
+    FOREIGN KEY (sender_id) REFERENCES Clients(client_id),
+    FOREIGN KEY (receiver_id) REFERENCES Clients(client_id)
+);
+
+CREATE TABLE Shipment_Carriers (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    shipment_id INT,
+    carrier_id INT,
+    leg_number INT, -- for multi-leg tracking
+    FOREIGN KEY (shipment_id) REFERENCES Shipments(shipment_id),
+    FOREIGN KEY (carrier_id) REFERENCES Carriers(carrier_id)
+);
+
+CREATE TABLE Shipment_Warehouse_History (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    shipment_id INT,
+    warehouse_id INT,
+    arrival_date DATE,
+    departure_date DATE,
+    FOREIGN KEY (shipment_id) REFERENCES Shipments(shipment_id),
+    FOREIGN KEY (warehouse_id) REFERENCES Warehouses(warehouse_id)
+);
+
+
+CREATE TABLE Current_Warehouse_Storage (
+    shipment_id INT PRIMARY KEY,
+    warehouse_id INT,
+    FOREIGN KEY (shipment_id) REFERENCES Shipments(shipment_id),
+    FOREIGN KEY (warehouse_id) REFERENCES Warehouses(warehouse_id)
+);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 -- Insert into Clients
 INSERT INTO Clients VALUES (1, 'Alpha Corp', '123 Industrial Area, Delhi');
 INSERT INTO Clients VALUES (2, 'Beta Logistics', '456 Tech Park, Mumbai');
